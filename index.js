@@ -1,7 +1,6 @@
 const Discord = require("discord.js");
 const Client = new Discord.Client();
 const dotenv = require("dotenv");
-const Canvas = require("canvas");
 const ytdl = require("ytdl-core");
 const ytSearch = require("yt-search");
 
