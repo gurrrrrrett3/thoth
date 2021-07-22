@@ -514,16 +514,6 @@ function setStatus(mode, song) {
   }
 }
 
-const validURL = (str) => {
-  var regex =
-    /(http|https):\/\/(\w+:{0,1}\w*)?(\S+)(:[0-9]+)?(\/|\/([\w#!:.?+=&%!\-\/]))?/;
-  if (!regex.test(str)) {
-    return false;
-  } else {
-    return true;
-  }
-};
-
 async function playVideo(guild, song) {
   const guildQueue = queue.get(guild.id);
 
