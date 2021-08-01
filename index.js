@@ -551,7 +551,7 @@ function SendHelpEmbed() {
       },
       {
         name: "-3",
-        val: "Links the video as an MP3 file.\nSyntax: `-3 <Song name or URL>`",
+        value: "Links the video as an MP3 file.\nSyntax: `-3 <Song name or URL>`",
       },
       {
         name: "-4",
