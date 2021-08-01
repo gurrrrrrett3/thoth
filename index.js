@@ -3,6 +3,9 @@ const Client = new Discord.Client();
 const dotenv = require("dotenv");
 const ytdl = require("ytdl-core");
 const ytSearch = require("yt-search");
+const fs = require("fs")
+
+const version = "Thoth | Ver: 1.5"
 
 dotenv.config();
 
@@ -196,11 +199,61 @@ Client.on("message", async (message) => {
       queueEmbed.setDescription(queuePage);
       queueEmbed.setTimestamp();
       queueEmbed.setColor(message.member.displayHexColor);
-      queueEmbed.setFooter("Thoth: Ver 1.2");
+      queueEmbed.setFooter(version);
 
       message.channel.send(queueEmbed);
     }
-  }
+  } 
+
+  if (parts[0] == "-3") {
+    if (!parts[1])
+        return message.channel.send(
+          SendErrorEmbed("Oops!", "You need something to play!")
+        );
+
+      var song = {};
+
+      if (ytdl.validateURL(parts[1])) {
+        const songInfo = await ytdl.getInfo(parts[1]);
+        song = {
+          title: songInfo.videoDetails.title,
+          url: songInfo.videoDetails.video_url,
+          length: songInfo.videoDetails.lengthSeconds
+            .toString()
+            .match(/\(.+\)/g)
+            .toString()
+            .replace(/[()]+/g, ""),
+        };
+      } else {
+        const video = await findVideo(parts.slice(1).join(" "));
+        if (video) {
+          song = {
+            title: video.title,
+            url: video.url,
+            length: video.duration
+              .toString()
+              .match(/\(.+\)/g)
+              .toString()
+              .replace(/[()]+/g, ""),
+          };
+
+          try {
+            const attachment = new Discord.MessageAttachment(
+              await ytdl(song.url, { filter: type.download }),
+              `${song.title}.${type.ext}`
+            );
+            message.channel.send(attachment);
+          } catch (err) {
+            message.channel.send(err);
+          }
+
+        } else {
+          message.channel.send(SendErrorEmbed("Oops!", "Error finding Video."));
+        }
+    }
+  
+  
+    }
 
   if (parts[0] == "+") {
     //sanity checks
@@ -383,7 +436,7 @@ Client.on("message", async (message) => {
       });
   }
 
-  if (parts[0] == ";help") {
+  if (parts[0] == ">help") {
     message.channel.send(SendHelpEmbed());
   }
 });
@@ -422,7 +475,7 @@ function SendErrorEmbed(title, message) {
     .setDescription(message)
     .setColor("#FF0000")
     .setTimestamp()
-    .setFooter("Thoth: Ver 1.2");
+    .setFooter(version);
   return errorEmbed;
 }
 
@@ -432,7 +485,7 @@ function SendSucessEmbed(title, message) {
     .setDescription(message)
     .setColor("#00FF00")
     .setTimestamp()
-    .setFooter("Thoth: Ver 1.2");
+    .setFooter(version);
   return sucessEmbed;
 }
 
@@ -459,14 +512,16 @@ function SendCorrectUsageEmbed(reason) {
       }
     )
     .setTimestamp()
-    .setFooter("Thoth: Ver 1.2");
+    .setFooter(version);
   return CUEmbed;
 }
 
 function SendHelpEmbed() {
   const HelpEmbed = new Discord.MessageEmbed()
     .setTitle("Help")
-    .setDescription("Use this to create and manage Catacombs!")
+    .setDescription(
+      "Use this bot to create and manage Catacombs, along with playing and downloading music!"
+    )
     .setColor("#00FF00")
     .addFields(
       {
@@ -476,10 +531,36 @@ function SendHelpEmbed() {
       {
         name: "-",
         value: "Removes someone from your Catacomb.\nSyntax: `- <Mention>`",
+      },
+      {
+        name: ">p",
+        value:
+          "Plays a song in your current VC.\nSyntax: `>p <Song name or URL>`",
+      },
+      {
+        name: ">q",
+        value: "Displays the current queue.\nSyntax: `>q`",
+      },
+      {
+        name: ">skip",
+        queue: "Skips the current song.\nSyntax: `>skip`",
+      },
+      {
+        name: ">stop",
+        value: "Stops playback, and clears the queue.\nSyntax: `>stop`",
+      },
+      {
+        name: "-3",
+        val: "Links the video as an MP3 file.\nSyntax: `-3 <Song name or URL>`",
+      },
+      {
+        name: "-4",
+        value:
+          "Links the vudeo as a MP4 file.\nSyntax: `-4 <Song name or URL>`",
       }
     )
     .setTimestamp()
-    .setFooter("Thoth: Ver 1.2");
+    .setFooter(version);
   return HelpEmbed;
 }
 
@@ -509,7 +590,7 @@ function setStatus(mode, song) {
       });
       break;
 
-    default:
+    default:back
       break;
   }
 }
